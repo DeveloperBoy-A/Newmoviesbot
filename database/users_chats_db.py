@@ -1,7 +1,7 @@
 # https://github.com/odysseusmax/animated-lamp/blob/master/bot/database/database.py
 import motor.motor_asyncio
 import datetime
-from info import DATABASE_NAME, DATABASE_URI, IMDB, IMDB_TEMPLATE, MELCOW_NEW_USERS, P_TTI_SHOW_OFF, SINGLE_BUTTON, SPELL_CHECK_REPLY, PROTECT_CONTENT
+from info import DATABASE_NAME, DATABASE_URI, IMDB, IMDB_TEMPLATE, MELCOW_NEW_USERS, P_TTI_SHOW_OFF, SINGLE_BUTTON, SPELL_CHECK_REPLY, PROTECT_CONTENT, MAX_BTN, URL_MODE, TUTORIAL, IS_TUTORIAL, URL_SHORTENR_WEBSITE, URL_SHORTNER_WEBSITE_API
 
 class Database:
     
@@ -10,6 +10,8 @@ class Database:
         self.db = self._client[database_name]
         self.col = self.db.users
         self.grp = self.db.groups
+        self.users = self.db.uersz
+        self.req = self.db.requests
 
     def new_user(self, id, name):
         return dict(    
@@ -35,9 +37,19 @@ class Database:
             title = title,
             chat_status=dict(
                 is_disabled=False,
+                is_lazy_verified=False,
                 reason="",
             ),
         )
+    
+    async def find_join_req(self, id):
+        return bool(await self.req.find_one({'id': id}))
+        
+    async def add_join_req(self, id):
+        await self.req.insert_one({'id': id})
+    
+    async def del_join_req(self):
+        await self.req.drop()
     
     async def add_user(self, id, name):
         user = self.new_user(id, name)
@@ -57,6 +69,10 @@ class Database:
             ban_reason=''
         )
         await self.col.update_one({'id': id}, {'$set': {'ban_status': ban_status}})
+    
+    async def get_user(self, user_id):
+        user_data = await self.users.find_one({"id": user_id})
+        return user_data
     
     async def ban_user(self, user_id, ban_reason="No Reason"):
         ban_status = dict(
@@ -78,23 +94,43 @@ class Database:
     async def get_all_users(self):
         return self.col.find({})
     
-
+    async def update_user(self, user_data):
+        await self.users.update_one({"id": user_data["id"]}, {"$set": user_data}, upsert=True)
+    
+    async def has_prime_status(self, user_id):
+        user_data = await self.get_user(user_id)
+        if user_data:
+            expiry_time = user_data.get("expiry_time")
+            if expiry_time is None:
+                # User previously used the free trial, but it has ended.
+                return False
+            elif isinstance(expiry_time, datetime.datetime) and datetime.datetime.now() <= expiry_time:
+                return True
+            else:
+                await self.users.update_one({"id": user_id}, {"$set": {"expiry_time": None}})
+        return False
+        
+    async def remove_prime_status(self, user_id):
+        return await self.update_one(
+            {"id": user_id}, {"$set": {"expiry_time": None}}
+        )
+    
     async def delete_user(self, user_id):
         await self.col.delete_many({'id': int(user_id)})
-
-
+                
     async def get_banned(self):
         users = self.col.find({'ban_status.is_banned': True})
         chats = self.grp.find({'chat_status.is_disabled': True})
+        is_verified = self.grp.find({'chat_status.is_lazy_verified': True})
         b_chats = [chat['id'] async for chat in chats]
         b_users = [user['id'] async for user in users]
-        return b_users, b_chats
+        lz_verified = [chat['id'] async for chat in is_verified]
+        return b_users, b_chats, lz_verified
 
     async def add_chat(self, chat, title):
         chat = self.new_group(chat, title)
         await self.grp.insert_one(chat)
     
-
     async def get_chat(self, chat):
         chat = await self.grp.find_one({'id':int(chat)})
         return False if not chat else chat.get('chat_status')
@@ -108,7 +144,6 @@ class Database:
         
     async def update_settings(self, id, settings):
         await self.grp.update_one({'id': int(id)}, {'$set': {'settings': settings}})
-        
     
     async def get_settings(self, id):
         default = {
@@ -118,18 +153,30 @@ class Database:
             'imdb': IMDB,
             'spell_check': SPELL_CHECK_REPLY,
             'welcome': MELCOW_NEW_USERS,
-            'template': IMDB_TEMPLATE
+            'template': IMDB_TEMPLATE,
+            'max_btn': MAX_BTN,
+            'shortlink': URL_SHORTENR_WEBSITE,
+            'shortlink_api': URL_SHORTNER_WEBSITE_API,
+            'url_mode': URL_MODE,
+            'tutorial': TUTORIAL,
+            'is_tutorial': IS_TUTORIAL
+
         }
         chat = await self.grp.find_one({'id':int(id)})
         if chat:
             return chat.get('settings', default)
         return default
-    
 
     async def disable_chat(self, chat, reason="No Reason"):
         chat_status=dict(
             is_disabled=True,
             reason=reason,
+            )
+        await self.grp.update_one({'id': int(chat)}, {'$set': {'chat_status': chat_status}})
+
+    async def verify_lazy_chat(self, chat):
+        chat_status=dict(
+            is_lazy_verified=True,
             )
         await self.grp.update_one({'id': int(chat)}, {'$set': {'chat_status': chat_status}})
     
