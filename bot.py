@@ -34,14 +34,14 @@ from plugins import web_server
 
 import asyncio
 from pyrogram import idle
-from lazybot import LazyPrincessBot
+from lazybot import @Newmovie_sbot
 
 from util.keepalive import ping_server
 from lazybot.clients import initialize_clients
 
 
 PORT = "8080"
-LazyPrincessBot.start()
+@Newmovie_sbot.start()
 loop = asyncio.get_event_loop()
 
 
@@ -50,8 +50,8 @@ async def Lazy_start():
     print(' Initalizing Telegram Bot ')
     if not os.path.isdir(DOWNLOAD_LOCATION):
         os.makedirs(DOWNLOAD_LOCATION)
-    bot_info = await LazyPrincessBot.get_me()
-    LazyPrincessBot.username = bot_info.username
+    bot_info = await @Newmovie_sbot.get_me()
+    @Newmovie_sbot.username = bot_info.username
     await initialize_clients()
     if ON_HEROKU:
         asyncio.create_task(ping_server())
@@ -60,11 +60,11 @@ async def Lazy_start():
     temp.BANNED_CHATS = b_chats
     temp.LAZY_VERIFIED_CHATS = lz_verified
     await Media.ensure_indexes()
-    me = await LazyPrincessBot.get_me()
+    me = await @Newmovie_sbot.get_me()
     temp.ME = me.id
     temp.U_NAME = me.username
     temp.B_NAME = me.first_name
-    LazyPrincessBot.username = '@' + me.username
+    @Newmovie_sbot.username = '@' + me.username
     app = web.AppRunner(await web_server())
     await app.setup()
     bind_address = "0.0.0.0" if ON_HEROKU else BIND_ADRESS
