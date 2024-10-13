@@ -32,4 +32,4 @@ filetype
 tldextract
 lk21
 Flask==2.2.2
-
+aiohttp==3.8.2
