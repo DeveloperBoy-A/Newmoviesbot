@@ -34,7 +34,7 @@ from plugins import web_server
 
 import asyncio
 from pyrogram import idle
-from @Newmovie_sbot import DeveloperBoy-A
+from Newmovie_sbot import DeveloperBoy-A
 
 from util.keepalive import ping_server
 from lazybot.clients import initialize_clients
@@ -64,7 +64,7 @@ async def Newmovie_s_start():
     temp.ME = me.id
     temp.U_NAME = me.username
     temp.B_NAME = me.first_name
-    @Newmovie_sbot.username = '@' + me.username
+    Newmovie_sbot.username = '@' + me.username
     app = web.AppRunner(await web_server())
     await app.setup()
     bind_address = "0.0.0.0" if ON_HEROKU else BIND_ADRESS
