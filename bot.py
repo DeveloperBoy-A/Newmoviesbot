@@ -44,7 +44,6 @@ PORT = "8080"
 Newmovie_sbot.start()
 
 loop = asyncio.get_event_loop()
-    loop.run_until_complete(asyncio.gather(*coroutine_list))
     self._queue = []
 
 async def Newmovies_start():
