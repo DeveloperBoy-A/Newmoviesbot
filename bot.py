@@ -34,7 +34,7 @@ from plugins import web_server
 
 import asyncio
 from pyrogram import idle
-from Newmovie_sbot import DeveloperBoy-A
+from Newmoviesbot import DeveloperBoy-A
 
 from util.keepalive import ping_server
 from lazybot.clients import initialize_clients
@@ -45,7 +45,7 @@ PORT = "8080"
 loop = asyncio.get_event_loop()
 
 
-async def Newmovie_s_start():
+async def Newmovies_start():
     print('\n')
     print(' Initalizing Telegram Bot ')
     if not os.path.isdir(DOWNLOAD_LOCATION):
