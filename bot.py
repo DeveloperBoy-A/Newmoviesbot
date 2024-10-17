@@ -34,7 +34,7 @@ from plugins import web_server
 
 import asyncio
 from pyrogram import idle
-from Newmoviesbot import DeveloperBoy-A
+from Newmoviesbot import DeveloperBoyA
 
 from util.keepalive import ping_server
 from lazybot.clients import initialize_clients
@@ -75,7 +75,7 @@ async def Newmovies_start():
 
 if __name__ == '__main__':
     try:
-        loop.run_until_complete(Lazy_start())
+        loop.run_until_complete(Newmovies_start())
         logging.info('-----------------------🧐 Service running in Lazy Mode 😴-----------------------')
     except KeyboardInterrupt:
         logging.info('-----------------------😜 Service Stopped Sweetheart 😝-----------------------')
