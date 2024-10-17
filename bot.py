@@ -51,7 +51,7 @@ async def Newmovie_s_start():
     if not os.path.isdir(DOWNLOAD_LOCATION):
         os.makedirs(DOWNLOAD_LOCATION)
     bot_info = await Newmovie_sbot.get_me()
-    @Newmovie_sbot.username = bot_info.username
+    Newmovie_sbot.username = bot_info.username
     await initialize_clients()
     if ON_HEROKU:
         asyncio.create_task(ping_server())
