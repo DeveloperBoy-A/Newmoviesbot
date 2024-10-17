@@ -41,8 +41,8 @@ from lazybot.clients import initialize_clients
 
 
 PORT = "8080"
-@Newmovie_sbot.start()
-loop = asyncio.get_event_loop()
+Newmovie_sbot.start()
+loop = asyncio get_event_loop()
 
 
 async def Newmovies_start():
